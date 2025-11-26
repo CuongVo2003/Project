@@ -1,10 +1,13 @@
 <script setup>
 import { ref } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 axios.defaults.baseURL = '/api';
 
-const mode = ref('login'); // 'login' | 'register'
+const router = useRouter();
+
+const mode = ref('login');
 const loading = ref(false);
 const errors = ref(null);
 
@@ -18,8 +21,7 @@ async function submitLogin() {
     const { data } = await axios.post('/login', loginForm.value);
     localStorage.setItem('token', data.token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    // reload to let App.vue fetch /me
-    window.location.reload();
+   await router.push({ name: 'home' });
   } catch (e) {
     errors.value = e.response?.data?.message || (e.response?.data || e).errors || 'Login failed';
   } finally { loading.value = false; }
@@ -32,7 +34,7 @@ async function submitRegister() {
     const { data } = await axios.post('/register', registerForm.value);
     localStorage.setItem('token', data.token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    window.location.reload();
+    await router.push({ name: 'auth' });
   } catch (e) {
     errors.value = e.response?.data?.message || (e.response?.data || e).errors || 'Register failed';
   } finally { loading.value = false; }

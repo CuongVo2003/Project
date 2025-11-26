@@ -64,7 +64,6 @@ const total = computed(() => {
     </div>
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Items -->
       <div class="lg:col-span-2 space-y-4">
         <div
           v-for="item in cartItems"
@@ -84,7 +83,6 @@ const total = computed(() => {
         </div>
       </div>
 
-      <!-- Summary -->
       <div class="bg-white rounded-lg shadow p-6 h-fit">
         <h2 class="text-2xl font-bold mb-4">Tóm tắt đơn hàng</h2>
         <div class="space-y-3 mb-4 border-b pb-4">

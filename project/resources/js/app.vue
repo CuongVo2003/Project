@@ -1,22 +1,16 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute, RouterView, RouterLink } from 'vue-router';
 import axios from 'axios';
 import Header from './components/Header.vue';
-import Home from './pages/Home.vue';
-import ProductDetail from './pages/ProductDetail.vue';
-import Cart from './pages/Cart.vue';
-import Checkout from './pages/Checkout.vue';
-import Profile from './pages/Profile.vue';
-import Auth from './pages/Auth.vue';
-import AdminDashboard from './pages/Admin/AdminDashboard.vue';
-import ProductManage from './pages/Admin/ProductManage.vue';
-import CategoryManage from './pages/Admin/CategoryManage.vue';
-import OrderManage from './pages/Admin/OrderManage.vue';
 
 axios.defaults.baseURL = '/api';
 
+const router = useRouter();
+const route = useRoute();
+
 const user = ref(null);
-const currentPage = ref('home');
+
 const cartCount = computed(() => {
   const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   return cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -24,7 +18,7 @@ const cartCount = computed(() => {
 
 const token = localStorage.getItem('token');
 if (token) {
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  axios.defaults.headers.common.Authorization = `Bearer ${token}`;
 }
 
 onMounted(async () => {
@@ -33,7 +27,7 @@ onMounted(async () => {
     user.value = data;
   } catch (e) {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    delete axios.defaults.headers.common.Authorization;
     user.value = null;
   }
 });
@@ -43,61 +37,98 @@ async function handleLogout() {
     await axios.post('/logout');
   } catch (_) {}
   localStorage.removeItem('token');
-  delete axios.defaults.headers.common['Authorization'];
+  delete axios.defaults.headers.common.Authorization;
   user.value = null;
-  currentPage.value = 'home';
+  router.push({ name: 'home' });
 }
 
 function navigateTo(page, params = {}) {
-  // nếu user không phải admin nhưng cố gắng vào admin page → chặn
-  if (page.startsWith('admin/') && (!user.value || user.value.role !== 'admin')) {
+  if (page.startsWith('admin.') && (!user.value || user.value.role !== 'admin')) {
     alert('Bạn không có quyền truy cập');
     return;
   }
-  currentPage.value = page;
+
+  switch (page) {
+    case 'home':
+      router.push({ name: 'home' });
+      break;
+    case 'product':
+      router.push({ name: 'product.show', params: { id: params.id } });
+      break;
+    case 'cart':
+      router.push({ name: 'cart' });
+      break;
+    case 'checkout':
+      router.push({ name: 'checkout' });
+      break;
+    case 'profile':
+      router.push({ name: 'profile' });
+      break;
+    case 'auth':
+      router.push({ name: 'auth' });
+      break;
+    default:
+      router.push({ name: page });
+  }
 }
 
-function handleLogin() {
-  window.location.reload();
-}
-
-function handleRegister() {
-  window.location.reload();
-}
+const isAdmin = computed(() => user.value?.role === 'admin');
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <Header 
-      :user="user" 
+    <Header
+      :user="user"
       :cart-count="cartCount"
       @navigate="navigateTo"
-      @logout="handleLogout" />
+      @logout="handleLogout"
+    />
 
-    <!-- Navigation bar cho admin -->
-    <nav v-if="user?.role === 'admin'" class="bg-gray-800 text-white px-4 py-3">
-      <div class="max-w-7xl mx-auto flex gap-6">
-        <button @click="navigateTo('admin/dashboard')" class="hover:text-yellow-400">Dashboard</button>
-        <button @click="navigateTo('admin/products')" class="hover:text-yellow-400">Quản lý sản phẩm</button>
-        <button @click="navigateTo('admin/categories')" class="hover:text-yellow-400">Quản lý danh mục</button>
-        <button @click="navigateTo('admin/orders')" class="hover:text-yellow-400">Quản lý đơn hàng</button>
-        <button @click="navigateTo('home')" class="ml-auto hover:text-yellow-400">← Về trang chủ</button>
+    <nav v-if="isAdmin" class="bg-gray-800 text-white px-4 py-3">
+      <div class="max-w-7xl mx-auto flex gap-6 items-center">
+        <RouterLink
+          :to="{ name: 'admin.dashboard' }"
+          class="hover:text-yellow-400"
+        >
+          Dashboard
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'admin.products' }"
+          class="hover:text-yellow-400"
+        >
+          Quản lý sản phẩm
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'admin.categories' }"
+          class="hover:text-yellow-400"
+        >
+          Quản lý danh mục
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'admin.orders' }"
+          class="hover:text-yellow-400"
+        >
+          Quản lý đơn hàng
+        </RouterLink>
+
+        <RouterLink
+          :to="{ name: 'home' }"
+          class="ml-auto hover:text-yellow-400"
+        >
+          ← Về trang chủ
+        </RouterLink>
       </div>
     </nav>
 
     <main>
-      <Home v-if="currentPage === 'home'" :user="user" @navigate="navigateTo" />
-      <ProductDetail v-else-if="currentPage === 'product'" :user="user" @navigate="navigateTo" />
-      <Cart v-else-if="currentPage === 'cart'" :user="user" @navigate="navigateTo" />
-      <Checkout v-else-if="currentPage === 'checkout'" :user="user" @navigate="navigateTo" />
-      <Profile v-else-if="currentPage === 'profile'" :user="user" @logout="handleLogout" />
-      <Auth v-else-if="currentPage === 'auth'" @login="handleLogin" @register="handleRegister" />
-
-      <!-- Admin Pages -->
-      <AdminDashboard v-else-if="currentPage === 'admin/dashboard'" :user="user" />
-      <ProductManage v-else-if="currentPage === 'admin/products'" :user="user" />
-      <CategoryManage v-else-if="currentPage === 'admin/categories'" :user="user" />
-      <OrderManage v-else-if="currentPage === 'admin/orders'" :user="user" />
+      <RouterView v-slot="{ Component }">
+        <component
+          :is="Component"
+          :user="user"
+          @navigate="navigateTo"
+          @logout="handleLogout"
+        />
+      </RouterView>
     </main>
   </div>
 </template>
