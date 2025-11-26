@@ -11,49 +11,40 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
             'password' => 'required|string|min:6|confirmed'
         ]);
 
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
             'role' => 'user'
         ]);
 
         $token = $user->createToken('api_token')->plainTextToken;
 
-        return response()->json([
-            'user'  => $user,
-            'token' => $token
-        ], 201);
+        return response()->json(['user' => $user, 'token' => $token], 201);
     }
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email'    => 'required|email',
+        $validated = $request->validate([
+            'email' => 'required|email',
             'password' => 'required|string'
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $validated['email'])->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Email hoặc mật khẩu không đúng'], 401);
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
-
-        // xóa token cũ nếu muốn
-        $user->tokens()->delete();
 
         $token = $user->createToken('api_token')->plainTextToken;
 
-        return response()->json([
-            'user'  => $user,
-            'token' => $token
-        ]);
+        return response()->json(['user' => $user, 'token' => $token]);
     }
 
     public function me(Request $request)
@@ -63,9 +54,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // xóa token đang dùng
         $request->user()->currentAccessToken()->delete();
-
-        return response()->json(['message' => 'Đã đăng xuất']);
+        return response()->json(['message' => 'Logged out']);
     }
 }

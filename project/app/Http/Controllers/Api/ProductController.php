@@ -9,43 +9,64 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // Public: list sản phẩm (có search, filter, sort)
+    public function index(Request $request)
     {
-        $products = Product::with('category')->get();
-        $products->transform(function ($p) {
-            $p->image_url = $p->image ? asset('storage/' . $p->image) : null;
-            return $p;
-        });
-        return response()->json($products);
+        $query = Product::with('category');
+
+        // Search theo tên
+        if ($request->has('search') && $request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter theo category
+        if ($request->has('category_id') && $request->category_id) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Filter theo giá
+        if ($request->has('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->has('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Sort
+        $sort = $request->get('sort', 'latest');
+        if ($sort === 'price_asc') {
+            $query->orderBy('price', 'asc');
+        } elseif ($sort === 'price_desc') {
+            $query->orderBy('price', 'desc');
+        } elseif ($sort === 'popular') {
+            $query->withCount('orderItems')->orderBy('order_items_count', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        return response()->json($query->paginate(12));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(Product $product)
     {
-        //
+        return response()->json($product->load('category'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Admin: create
     public function store(Request $request)
     {
-        if (!$request->user() || $request->user()->role !== 'admin') {
-            return response()->json(['message' => 'Bạn không có quyền tạo sản phẩm'], 403);
+        if (!$request->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $validated = $request->validate([
-            'category_id' => 'required|integer|exists:categories,id',
+            'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|image|max:2048',
+            'discount_percent' => 'nullable|numeric|min:0|max:100'
         ]);
 
         if ($request->hasFile('image')) {
@@ -54,74 +75,47 @@ class ProductController extends Controller
         }
 
         $product = Product::create($validated);
-        $product->load('category');
-        // add full url for convenience
-        $product->image_url = $product->image ? asset('storage/' . $product->image) : null;
-
         return response()->json($product, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Product $product)
-    {
-        $product->load('category');
-        $product->image_url = $product->image ? asset('storage/' . $product->image) : null;
-        return response()->json($product);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Product $product)
     {
-        if (!$request->user() || $request->user()->role !== 'admin') {
+        if (!$request->user()->isAdmin()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $validated = $request->validate([
-            'category_id' => 'required|integer|exists:categories,id',
+            'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|image|max:2048',
+            'discount_percent' => 'nullable|numeric|min:0|max:100'
         ]);
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('products', 'public');
-            $validated['image'] = $path;
-            // optional: delete old image file
             if ($product->image && Storage::disk('public')->exists($product->image)) {
                 Storage::disk('public')->delete($product->image);
             }
+            $validated['image'] = $path;
         }
 
         $product->update($validated);
-        $product->load('category');
-        $product->image_url = $product->image ? asset('storage/' . $product->image) : null;
-
         return response()->json($product);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Request $request, Product $product)
     {
-        if (!$request->user() || $request->user()->role !== 'admin') {
+        if (!$request->user()->isAdmin()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        if ($product->image && Storage::disk('public')->exists($product->image)) {
+            Storage::disk('public')->delete($product->image);
+        }
+
         $product->delete();
-        return response()->json(['message' => 'Xóa thành công']);
+        return response()->json(['message' => 'Product deleted']);
     }
 }
