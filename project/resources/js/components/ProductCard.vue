@@ -10,7 +10,6 @@ const emit = defineEmits(['view', 'add-to-cart']);
 <template>
   <div class="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer border border-gray-100"
        @click="emit('view', product.id)">
-    <!-- Image Container -->
     <div class="relative w-full h-56 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
       <img 
         v-if="product.image_url" 
@@ -22,7 +21,6 @@ const emit = defineEmits(['view', 'add-to-cart']);
         <div class="text-6xl opacity-30">📦</div>
       </div>
 
-      <!-- Discount Badge -->
       <div 
         v-if="product.discount_percent > 0" 
         class="absolute top-3 right-3 bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg flex items-center gap-1">
@@ -30,7 +28,6 @@ const emit = defineEmits(['view', 'add-to-cart']);
         <span>-{{ product.discount_percent }}%</span>
       </div>
 
-      <!-- Stock Badge -->
       <div 
         v-if="product.stock === 0"
         class="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -39,7 +36,6 @@ const emit = defineEmits(['view', 'add-to-cart']);
         </span>
       </div>
 
-      <!-- Quick View Overlay -->
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div class="absolute bottom-3 left-3 right-3 flex gap-2">
           <button 
@@ -51,14 +47,11 @@ const emit = defineEmits(['view', 'add-to-cart']);
       </div>
     </div>
 
-    <!-- Content -->
     <div class="p-5">
-      <!-- Product Name -->
       <h3 class="font-bold text-base text-gray-800 line-clamp-2 mb-3 min-h-[3rem] group-hover:text-red-600 transition">
         {{ product.name }}
       </h3>
 
-      <!-- Rating & Sold -->
       <div class="flex items-center gap-2 mb-3 text-xs text-gray-500">
         <div class="flex text-yellow-400">
           ⭐⭐⭐⭐⭐
@@ -67,7 +60,6 @@ const emit = defineEmits(['view', 'add-to-cart']);
         <span>Đã bán {{ Math.floor(Math.random() * 500) + 100 }}</span>
       </div>
 
-      <!-- Price -->
       <div class="mb-4">
         <div v-if="product.discount_percent > 0" class="space-y-1">
           <div class="flex items-baseline gap-2">
@@ -86,7 +78,6 @@ const emit = defineEmits(['view', 'add-to-cart']);
         </div>
       </div>
 
-      <!-- Stock Status -->
       <div class="mb-4 flex items-center gap-2">
         <div 
           :class="product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
@@ -97,7 +88,6 @@ const emit = defineEmits(['view', 'add-to-cart']);
         </div>
       </div>
 
-      <!-- Add to Cart Button -->
       <button
         @click.stop="emit('add-to-cart', product)"
         :disabled="product.stock === 0"
@@ -109,7 +99,6 @@ const emit = defineEmits(['view', 'add-to-cart']);
         <span>{{ product.stock > 0 ? 'Thêm vào giỏ' : 'Hết hàng' }}</span>
       </button>
 
-      <!-- Fast Shipping Badge -->
       <div v-if="product.stock > 0" class="mt-3 flex items-center justify-center gap-1 text-xs text-gray-600">
         <span>🚚</span>
         <span>Giao hàng nhanh 2h</span>

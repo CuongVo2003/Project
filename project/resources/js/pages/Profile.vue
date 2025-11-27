@@ -31,7 +31,6 @@ async function handleLogout() {
 <template>
   <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8">
     <div class="max-w-5xl mx-auto px-4">
-      <!-- Header -->
       <div class="mb-8">
         <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2 flex items-center gap-3">
           👤 Tài Khoản Của Tôi

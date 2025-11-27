@@ -7,23 +7,19 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PayPalController;
 use Illuminate\Support\Facades\Route;
 
-// Public Auth
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Public Products & Categories
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
+
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
-// Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
-    // Auth
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Orders
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::post('/orders', [OrderController::class, 'store']);
@@ -31,19 +27,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/paypal/create-order', [PayPalController::class, 'createOrder']);
     Route::post('/paypal/capture-order', [PayPalController::class, 'captureOrder']);
 
-    // Admin Only
     Route::middleware('admin')->group(function () {
-        // Products
         Route::post('/products', [ProductController::class, 'store']);
         Route::put('/products/{product}', [ProductController::class, 'update']);
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
-        // Categories
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::put('/categories/{category}', [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
 
-        // Orders (Admin)
         Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
         Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus']);
     });

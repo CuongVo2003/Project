@@ -1,4 +1,3 @@
-// resources/js/router/index.js
 import { createRouter, createWebHistory } from "vue-router";
 
 import Home from "../pages/Home.vue";
@@ -12,9 +11,11 @@ import AdminDashboard from "../pages/Admin/AdminDashboard.vue";
 import ProductManage from "../pages/Admin/ProductManage.vue";
 import CategoryManage from "../pages/Admin/CategoryManage.vue";
 import OrderManage from "../pages/Admin/OrderManage.vue";
+import Product from "../components/Product.vue";
 
 const routes = [
     { path: "/", name: "home", component: Home },
+    { path: "/products", name: "products", component: Product },
     {
         path: "/product/:id",
         name: "product.show",
@@ -57,4 +58,14 @@ const router = createRouter({
     routes,
 });
 
+router.beforeEach((to, from, next) => {
+    if (to.meta.requiresAdmin) {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        if (user.role !== "admin") {
+            alert("Bạn không có quyền truy cập trang này!");
+            return next({ name: "home" });
+        }
+    }
+    next();
+});
 export default router;

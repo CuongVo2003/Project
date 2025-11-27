@@ -9,22 +9,18 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    // Public: list sản phẩm (có search, filter, sort)
     public function index(Request $request)
     {
         $query = Product::with('category');
 
-        // Search theo tên
         if ($request->has('search') && $request->search) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        // Filter theo category
         if ($request->has('category_id') && $request->category_id) {
             $query->where('category_id', $request->category_id);
         }
 
-        // Filter theo giá
         if ($request->has('min_price')) {
             $query->where('price', '>=', $request->min_price);
         }
@@ -32,7 +28,6 @@ class ProductController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
-        // Sort
         $sort = $request->get('sort', 'latest');
         if ($sort === 'price_asc') {
             $query->orderBy('price', 'asc');
@@ -52,7 +47,6 @@ class ProductController extends Controller
         return response()->json($product->load('category'));
     }
 
-    // Admin: create
     public function store(Request $request)
     {
         if (!$request->user()->isAdmin()) {

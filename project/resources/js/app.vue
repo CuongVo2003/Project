@@ -1,13 +1,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter, useRoute, RouterView, RouterLink } from 'vue-router';
+import { useRouter, RouterView } from 'vue-router';
 import axios from 'axios';
 import Header from './components/Header.vue';
 
 axios.defaults.baseURL = '/api';
 
 const router = useRouter();
-
 const user = ref(null);
 
 const cartCount = computed(() => {
@@ -24,8 +23,10 @@ onMounted(async () => {
   try {
     const { data } = await axios.get('/me');
     user.value = data;
+    localStorage.setItem('user', JSON.stringify(data));
   } catch (e) {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     delete axios.defaults.headers.common.Authorization;
     user.value = null;
   }
@@ -35,7 +36,9 @@ async function handleLogout() {
   try {
     await axios.post('/logout');
   } catch (_) {}
+  
   localStorage.removeItem('token');
+  localStorage.removeItem('user');
   delete axios.defaults.headers.common.Authorization;
   user.value = null;
   router.push({ name: 'home' });
@@ -47,31 +50,33 @@ function navigateTo(page, params = {}) {
     return;
   }
 
-  switch (page) {
-    case 'home':
-      router.push({ name: 'home' });
-      break;
-    case 'product':
+  try {
+    if (page === 'product') {
       router.push({ name: 'product.show', params: { id: params.id } });
-      break;
-    case 'cart':
+    } else if (page === 'products') {
+      router.push({ name: 'products', query: params });
+    } else if (page === 'home') {
+      router.push({ name: 'home' });
+    } else if (page === 'cart') {
       router.push({ name: 'cart' });
-      break;
-    case 'checkout':
+    } else if (page === 'checkout') {
       router.push({ name: 'checkout' });
-      break;
-    case 'profile':
+    } else if (page === 'profile') {
       router.push({ name: 'profile' });
-      break;
-    case 'auth':
+    } else if (page === 'auth') {
       router.push({ name: 'auth' });
-      break;
-    default:
+    } else if (page.startsWith('admin.')) {
       router.push({ name: page });
+    } else {
+      router.push({ name: page });
+    }
+  } catch (error) {
+    console.error('Navigation error:', error);
   }
 }
 
 const isAdmin = computed(() => user.value?.role === 'admin');
+const isAdminRoute = computed(() => router.currentRoute.value.path.startsWith('/admin'));
 </script>
 
 <template>
@@ -83,75 +88,61 @@ const isAdmin = computed(() => user.value?.role === 'admin');
       @logout="handleLogout"
     />
 
-    <!-- Admin Navigation -->
-    <nav v-if="isAdmin" class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-xl border-b border-gray-700">
+    <nav v-if="isAdmin && isAdminRoute" class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-xl border-b border-gray-700">
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex flex-wrap gap-2 md:gap-6 items-center">
-          <RouterLink
+          <router-link
             :to="{ name: 'admin.dashboard' }"
             class="px-4 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center gap-2 font-medium"
             active-class="bg-white/20 shadow-lg"
           >
             <span>📊</span>
             <span class="hidden sm:inline">Dashboard</span>
-          </RouterLink>
-          <RouterLink
+          </router-link>
+          <router-link
             :to="{ name: 'admin.products' }"
             class="px-4 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center gap-2 font-medium"
             active-class="bg-white/20 shadow-lg"
           >
             <span>📦</span>
             <span class="hidden sm:inline">Quản lý sản phẩm</span>
-          </RouterLink>
-          <RouterLink
+          </router-link>
+          <router-link
             :to="{ name: 'admin.categories' }"
             class="px-4 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center gap-2 font-medium"
             active-class="bg-white/20 shadow-lg"
           >
             <span>🏷️</span>
             <span class="hidden sm:inline">Quản lý danh mục</span>
-          </RouterLink>
-          <RouterLink
+          </router-link>
+          <router-link
             :to="{ name: 'admin.orders' }"
             class="px-4 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center gap-2 font-medium"
             active-class="bg-white/20 shadow-lg"
           >
             <span>🛍️</span>
             <span class="hidden sm:inline">Quản lý đơn hàng</span>
-          </RouterLink>
+          </router-link>
 
-          <RouterLink
+          <router-link
             :to="{ name: 'home' }"
             class="ml-auto px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition-all duration-200 flex items-center gap-2 font-medium shadow-lg"
           >
             <span>←</span>
             <span class="hidden sm:inline">Về trang chủ</span>
-          </RouterLink>
+          </router-link>
         </div>
       </div>
     </nav>
 
     <main class="min-h-[calc(100vh-64px)]">
-      <RouterView v-slot="{ Component }">
-        <transition
-          enter-active-class="transition-all duration-300 ease-out"
-          enter-from-class="opacity-0 translate-y-4"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition-all duration-200 ease-in"
-          leave-from-class="opacity-100"
-          leave-to-class="opacity-0"
-        >
-          <component
-            :is="Component"
-            :user="user"
-            @navigate="navigateTo"
-            @logout="handleLogout"
-          />
-        </transition>
-      </RouterView>
+      <RouterView
+        :user="user"
+        @navigate="navigateTo"
+        @logout="handleLogout"
+      />
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 text-gray-300 mt-16">
       <div class="max-w-7xl mx-auto px-4 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
