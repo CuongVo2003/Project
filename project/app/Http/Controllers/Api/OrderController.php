@@ -96,4 +96,14 @@ class OrderController extends Controller
         $order->update($validated);
         return response()->json($order);
     }
+
+    public function adminIndex(Request $request)
+    {
+
+        $orders = Order::with(['items.product', 'user'])
+            ->latest()
+            ->paginate(20);
+
+        return response()->json($orders);
+    }
 }

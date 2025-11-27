@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\PayPalController;
 use Illuminate\Support\Facades\Route;
 
 // Public Auth
@@ -27,6 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::post('/orders', [OrderController::class, 'store']);
 
+    Route::post('/paypal/create-order', [PayPalController::class, 'createOrder']);
+    Route::post('/paypal/capture-order', [PayPalController::class, 'captureOrder']);
+
     // Admin Only
     Route::middleware('admin')->group(function () {
         // Products
@@ -40,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
 
         // Orders (Admin)
+        Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
         Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus']);
     });
 });

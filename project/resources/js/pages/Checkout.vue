@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -18,8 +18,24 @@ const form = ref({
   shipping_address: ''
 });
 
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success' // 'success' | 'error' | 'info'
+});
+
+function showToast(message, type = 'success') {
+  toast.value = { show: true, message, type };
+  setTimeout(() => {
+    toast.value.show = false;
+  }, 3000);
+}
+
+const paypalLoaded = ref(false);
+
 onMounted(() => {
   cart.value = JSON.parse(localStorage.getItem('cart') || '[]');
+  loadPayPalScript();
 });
 
 const total = computed(() => {
@@ -29,9 +45,77 @@ const total = computed(() => {
   }, 0);
 });
 
+function loadPayPalScript() {
+  if (paypalLoaded.value) return;
+
+  const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+  if (!clientId) {
+    console.warn('Missing VITE_PAYPAL_CLIENT_ID');
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD`;
+  script.onload = () => {
+    paypalLoaded.value = true;
+    renderPayPalButtons();
+  };
+  document.body.appendChild(script);
+}
+
+function renderPayPalButtons() {
+  if (!paypalLoaded.value || !window.paypal || total.value <= 0) return;
+
+  const container = document.getElementById('paypal-button-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  window.paypal.Buttons({
+    createOrder: async () => {
+      const { data } = await axios.post('/paypal/create-order', {
+        amount: (total.value / 23000).toFixed(2) // ví dụ convert VND -> USD tạm
+      });
+      return data.id;
+    },
+    onApprove: async (data) => {
+      try {
+        loading.value = true;
+        const payload = {
+          order_id: data.orderID,
+          items: cart.value.map(item => ({
+            product_id: item.product_id,
+            quantity: item.quantity
+          })),
+          shipping_name: form.value.shipping_name,
+          shipping_phone: form.value.shipping_phone,
+          shipping_address: form.value.shipping_address
+        };
+
+        const resp = await axios.post('/paypal/capture-order', payload);
+        showToast('Thanh toán PayPal thành công! Đơn #' + resp.data.order.id, 'success');
+        localStorage.removeItem('cart');
+        emit('navigate', 'home');
+      } catch (e) {
+        console.error(e);
+        showToast('Lỗi khi xác nhận PayPal: ' + (e.response?.data?.message || 'Thất bại'), 'error');
+      } finally {
+        loading.value = false;
+      }
+    },
+    onError: (err) => {
+      console.error(err);
+      showToast('Lỗi PayPal, vui lòng thử lại', 'error');
+    }
+  }).render('#paypal-button-container');
+}
+
+watch(total, () => {
+  if (paypalLoaded.value) renderPayPalButtons();
+});
+
 async function submitOrder() {
   if (!form.value.shipping_name || !form.value.shipping_phone || !form.value.shipping_address) {
-    alert('Vui lòng điền đầy đủ thông tin giao hàng');
+    showToast('Vui lòng điền đầy đủ thông tin giao hàng', 'error');
     return;
   }
 
@@ -46,11 +130,11 @@ async function submitOrder() {
     };
 
     const { data } = await axios.post('/orders', payload);
-    alert('Đặt hàng thành công! Mã đơn: ' + data.id);
+    showToast('Đặt hàng (COD) thành công! Mã đơn: ' + data.id, 'success');
     localStorage.removeItem('cart');
     emit('navigate', 'home');
   } catch (e) {
-    alert('Lỗi: ' + (e.response?.data?.message || 'Đặt hàng thất bại'));
+    showToast('Lỗi: ' + (e.response?.data?.message || 'Đặt hàng thất bại'), 'error');
   } finally {
     loading.value = false;
   }
@@ -62,50 +146,91 @@ async function submitOrder() {
     <h1 class="text-3xl font-bold mb-8">💳 Thanh Toán</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Form -->
       <div class="lg:col-span-2">
         <div class="bg-white rounded-lg shadow p-6 mb-6">
           <h2 class="text-2xl font-bold mb-6">Thông tin giao hàng</h2>
           <form @submit.prevent="submitOrder" class="space-y-4">
             <div>
               <label class="block text-sm font-semibold mb-2">Họ và tên *</label>
-              <input v-model="form.shipping_name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required />
+              <input
+                v-model="form.shipping_name"
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
+                required
+              />
             </div>
 
             <div>
               <label class="block text-sm font-semibold mb-2">Số điện thoại *</label>
-              <input v-model="form.shipping_phone" type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required />
+              <input
+                v-model="form.shipping_phone"
+                type="tel"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
+                required
+              />
             </div>
 
             <div>
               <label class="block text-sm font-semibold mb-2">Địa chỉ giao hàng *</label>
-              <textarea v-model="form.shipping_address" class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3" required></textarea>
+              <textarea
+                v-model="form.shipping_address"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
+                rows="3"
+                required
+              />
             </div>
 
             <button
               type="submit"
               :disabled="loading"
-              class="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold disabled:bg-gray-400">
+              class="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold disabled:bg-gray-400 transition-colors"
+            >
               {{ loading ? 'Đang xử lý...' : 'Đặt Hàng' }}
             </button>
           </form>
         </div>
       </div>
 
-      <!-- Order Summary -->
       <div class="bg-white rounded-lg shadow p-6 h-fit">
         <h2 class="text-2xl font-bold mb-4">Đơn hàng của bạn</h2>
         <div class="space-y-3 mb-4 border-b pb-4 max-h-64 overflow-y-auto">
           <div v-for="item in cart" :key="item.product_id" class="flex justify-between text-sm">
             <span>{{ item.product?.name }} x{{ item.quantity }}</span>
-            <span class="font-semibold">{{ ((item.product?.price_after_discount || item.product?.price || 0) * item.quantity).toLocaleString() }}đ</span>
+            <span class="font-semibold">
+              {{ ((item.product?.price_after_discount || item.product?.price || 0) * item.quantity).toLocaleString() }}đ
+            </span>
           </div>
         </div>
-        <div class="flex justify-between text-lg font-bold">
+        <div class="flex justify-between text-lg font-bold mb-4">
           <span>Tổng:</span>
           <span class="text-red-600">{{ total.toLocaleString() }}đ</span>
         </div>
+
+        <button
+          type="button"
+          :disabled="loading"
+          @click="submitOrder"
+          class="w-full mb-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold disabled:bg-gray-400"
+        >
+          {{ loading ? 'Đang xử lý...' : 'Đặt hàng (COD)' }}
+        </button>
+
+        <div class="text-center text-xs text-gray-400 mb-2">hoặc</div>
+
+        <div id="paypal-button-container"></div>
       </div>
+    </div>
+
+    <div
+      v-if="toast.show"
+      class="fixed top-4 right-4 z-50 flex items-center gap-3 rounded-lg px-4 py-3 shadow-lg text-sm font-medium transition-all"
+      :class="{
+        'bg-green-600 text-white': toast.type === 'success',
+        'bg-red-600 text-white': toast.type === 'error',
+        'bg-slate-800 text-white': toast.type === 'info'
+      }"
+    >
+      <span>{{ toast.message }}</span>
     </div>
   </div>
 </template>
