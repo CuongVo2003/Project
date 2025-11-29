@@ -1,0 +1,3 @@
+** chạy 2 terminal riêng port 8000 và 8001
+php artisan serve --port=8000 --env=user
+php artisan serve --port=8001 --env=admin

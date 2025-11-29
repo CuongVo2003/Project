@@ -57,4 +57,19 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged out']);
     }
+
+    public function adminUsers(Request $request)
+    {
+        $currentUser = $request->user();
+
+        if ($currentUser->role !== 'admin') {
+            return response()->json([
+                'message' => 'Forbidden'
+            ], 403);
+        }
+
+        $users = User::orderByDesc('id')->paginate(20);
+
+        return response()->json($users);
+    }
 }

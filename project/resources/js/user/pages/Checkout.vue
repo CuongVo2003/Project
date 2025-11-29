@@ -143,7 +143,9 @@ async function submitOrder() {
 
 <template>
   <div class="max-w-7xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">💳 Thanh Toán</h1>
+    <h1 class="text-3xl font-bold mb-8 flex items-center gap-3">
+      <i class="fa-solid fa-credit-card text-red-600 text-3xl"></i>
+    </h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
@@ -192,7 +194,9 @@ async function submitOrder() {
       </div>
 
       <div class="bg-white rounded-lg shadow p-6 h-fit">
-        <h2 class="text-2xl font-bold mb-4">Đơn hàng của bạn</h2>
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-cart-shopping text-red-600 text-2xl"></i>
+      </h2>
         <div class="space-y-3 mb-4 border-b pb-4 max-h-64 overflow-y-auto">
           <div v-for="item in cart" :key="item.product_id" class="flex justify-between text-sm">
             <span>{{ item.product?.name }} x{{ item.quantity }}</span>

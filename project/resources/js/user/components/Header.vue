@@ -21,6 +21,7 @@ function handleSearch() {
 function goAdmin() {
   emit('navigate', 'admin.dashboard');
 }
+
 </script>
 
 <template>
@@ -127,7 +128,7 @@ function goAdmin() {
                 <span class="font-medium">Tài khoản của tôi</span>
               </button>
               <button
-                @click="emit('navigate', 'orders')"
+                @click="emit('navigate', 'myorders')"
                 class="w-full text-left px-4 py-3 hover:bg-red-50 transition flex items-center gap-3">
                 <span class="text-xl">📦</span>
                 <span class="font-medium">Đơn hàng</span>

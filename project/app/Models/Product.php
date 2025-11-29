@@ -50,4 +50,9 @@ class Product extends Model
 
         return round($this->price * (100 - $this->discount_percent) / 100);
     }
+
+    public function orderItems()
+    {
+        return $this->hasMany(\App\Models\OrderItem::class);
+    }
 }

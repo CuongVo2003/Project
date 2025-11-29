@@ -99,17 +99,19 @@ const categoryIcons = ['💊', '🥤', '✨', '🌿', '🩺', '👶', '💄', '�
               <button
                 @click="goToProducts()"
                 class="px-8 py-4 bg-white text-red-600 rounded-xl font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
-                🛍️ Mua sắm ngay
+                <i class="fa-solid fa-bag-shopping mr-2"></i>
+                  Mua sắm ngay
               </button>
               <button class="px-8 py-4 bg-white/20 backdrop-blur-sm text-white rounded-xl font-bold text-lg hover:bg-white/30 transition-all duration-300">
-                📱 Tải app
+                <i class="fa-solid fa-mobile-screen-button mr-2"></i>
+                  Tải app
               </button>
             </div>
           </div>
           <div class="hidden md:flex justify-center">
             <div class="relative">
-              <div class="w-80 h-80 bg-white/20 backdrop-blur-lg rounded-3xl flex items-center justify-center text-9xl animate-float">
-                💊
+              <div class="w-80 h-80 bg-white/20 backdrop-blur-lg rounded-3xl flex items-center justify-center animate-float">
+                <img src="/public/image.png" alt="image" />
               </div>
               <div class="absolute -top-8 -right-8 w-24 h-24 bg-yellow-400 rounded-2xl flex items-center justify-center text-4xl animate-bounce">
                 ⭐
@@ -121,29 +123,41 @@ const categoryIcons = ['💊', '🥤', '✨', '🌿', '🩺', '👶', '💄', '�
     </section>
 
     <section class="max-w-7xl mx-auto px-4 -mt-12 relative z-20">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-          <div class="text-5xl mb-3">🚚</div>
-          <h3 class="font-bold text-gray-800 mb-1">Giao hàng 2h</h3>
-          <p class="text-sm text-gray-600">Miễn phí với đơn >500k</p>
-        </div>
-        <div class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-          <div class="text-5xl mb-3">💯</div>
-          <h3 class="font-bold text-gray-800 mb-1">Chính hãng 100%</h3>
-          <p class="text-sm text-gray-600">Cam kết hoàn tiền</p>
-        </div>
-        <div class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-          <div class="text-5xl mb-3">🎁</div>
-          <h3 class="font-bold text-gray-800 mb-1">Ưu đãi độc quyền</h3>
-          <p class="text-sm text-gray-600">Giảm giá đến 50%</p>
-        </div>
-        <div class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-          <div class="text-5xl mb-3">📞</div>
-          <h3 class="font-bold text-gray-800 mb-1">Tư vấn 24/7</h3>
-          <p class="text-sm text-gray-600">Dược sĩ tận tâm</p>
-        </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+      <div class="text-5xl mb-3 text-red-600">
+        <i class="fa-solid fa-truck-fast"></i>
       </div>
-    </section>
+      <h3 class="font-bold text-gray-800 mb-1">Giao hàng 2h</h3>
+      <p class="text-sm text-gray-600">Miễn phí với đơn >500k</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+      <div class="text-5xl mb-3 text-green-600">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h3 class="font-bold text-gray-800 mb-1">Chính hãng 100%</h3>
+      <p class="text-sm text-gray-600">Cam kết hoàn tiền</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+      <div class="text-5xl mb-3 text-yellow-500">
+        <i class="fa-solid fa-gift"></i>
+      </div>
+      <h3 class="font-bold text-gray-800 mb-1">Ưu đãi độc quyền</h3>
+      <p class="text-sm text-gray-600">Giảm giá đến 50%</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+      <div class="text-5xl mb-3 text-blue-600">
+        <i class="fa-solid fa-headset"></i>
+      </div>
+      <h3 class="font-bold text-gray-800 mb-1">Tư vấn 24/7</h3>
+      <p class="text-sm text-gray-600">Dược sĩ tận tâm</p>
+    </div>
+  </div>
+</section>
+
 
     <section class="max-w-7xl mx-auto px-4 py-16">
       <div class="flex items-center justify-between mb-8">
@@ -267,22 +281,22 @@ const categoryIcons = ['💊', '🥤', '✨', '🌿', '🩺', '👶', '💄', '�
       </div>
       <div class="grid md:grid-cols-3 gap-8">
         <div class="text-center">
-          <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-4xl">
-            🏆
+          <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-4xl text-white">
+            <i class="fa-solid fa-trophy"></i>
           </div>
           <h3 class="text-xl font-bold text-gray-800 mb-2">Uy tín hàng đầu</h3>
           <p class="text-gray-600">10+ năm kinh nghiệm trong ngành dược phẩm</p>
         </div>
         <div class="text-center">
-          <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-4xl">
-            ✅
+          <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-4xl text-white">
+            <i class="fa-solid fa-circle-check"></i>
           </div>
           <h3 class="text-xl font-bold text-gray-800 mb-2">Hàng chính hãng</h3>
           <p class="text-gray-600">100% sản phẩm nhập khẩu từ nguồn chính thống</p>
         </div>
         <div class="text-center">
-          <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-4xl">
-            💝
+          <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-4xl text-white">
+            <i class="fa-solid fa-heart"></i>
           </div>
           <h3 class="text-xl font-bold text-gray-800 mb-2">Chăm sóc tận tâm</h3>
           <p class="text-gray-600">Đội ngũ dược sĩ tư vấn 24/7 miễn phí</p>

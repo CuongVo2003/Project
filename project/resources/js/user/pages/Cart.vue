@@ -56,50 +56,55 @@ const total = computed(() => subtotal.value + shipping.value);
 <template>
   <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8">
     <div class="max-w-7xl mx-auto px-4">
+
       <div class="mb-8">
         <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-          🛒 Giỏ Hàng Của Bạn
+          [Cart] Giỏ Hàng Của Bạn
         </h1>
         <p class="text-gray-600">{{ cartItems.length }} sản phẩm trong giỏ hàng</p>
       </div>
 
       <div v-if="cartItems.length === 0" class="text-center py-20">
         <div class="bg-white rounded-2xl shadow-lg p-12 max-w-md mx-auto">
-          <div class="text-8xl mb-6">🛒</div>
+          <div class="text-5xl mb-6 text-gray-400">[Cart]</div>
           <h2 class="text-3xl font-bold text-gray-800 mb-3">Giỏ hàng trống</h2>
-          <p class="text-gray-500 mb-8">Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
+          <p class="text-gray-500 mb-8">Hãy thêm sản phẩm vào giỏ để tiếp tục mua sắm</p>
           <button
             @click="emit('navigate', 'home')"
             class="px-8 py-4 bg-gradient-to-r from-red-600 to-orange-500 text-white rounded-xl hover:shadow-xl transition-all duration-300 font-semibold text-lg">
-            🏠 Về trang chủ
+            [Home] Về trang chủ
           </button>
         </div>
       </div>
 
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
         <div class="lg:col-span-2 space-y-4">
           <div
             v-for="item in cartItems"
             :key="item.product_id"
             class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 group">
+
             <div class="flex gap-6">
               <div class="flex-shrink-0">
                 <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100">
                   <img 
-                    v-if="item.product.image_url" 
-                    :src="item.product.image_url" 
-                    alt="" 
-                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
+                    v-if="item.product.image_url"
+                    :src="item.product.image_url"
+                    alt=""
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
-                    📦
+                  <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-xl">
+                    [Product]
                   </div>
                 </div>
               </div>
+
               <div class="flex-1 min-w-0">
                 <h3 class="font-bold text-lg text-gray-800 mb-2 truncate">
                   {{ item.product.name }}
                 </h3>
+
                 <div class="flex items-baseline gap-3 mb-4">
                   <p class="text-2xl font-bold text-red-600">
                     {{ (item.product.price_after_discount || item.product.price).toLocaleString() }}đ
@@ -115,24 +120,26 @@ const total = computed(() => subtotal.value + shipping.value);
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3 bg-gray-100 rounded-lg p-1">
                     <button 
-                      @click="updateQuantity(item.product_id, item.quantity - 1)" 
+                      @click="updateQuantity(item.product_id, item.quantity - 1)"
                       class="w-10 h-10 bg-white rounded-lg hover:bg-red-600 hover:text-white transition-all duration-200 font-bold shadow-sm">
-                      −
+                      -
                     </button>
+
                     <span class="px-4 py-2 font-semibold text-lg min-w-[3rem] text-center">
                       {{ item.quantity }}
                     </span>
+
                     <button 
-                      @click="updateQuantity(item.product_id, item.quantity + 1)" 
+                      @click="updateQuantity(item.product_id, item.quantity + 1)"
                       class="w-10 h-10 bg-white rounded-lg hover:bg-red-600 hover:text-white transition-all duration-200 font-bold shadow-sm">
                       +
                     </button>
                   </div>
-                  
-                  <button 
-                    @click="removeItem(item.product_id)" 
+
+                  <button
+                    @click="removeItem(item.product_id)"
                     class="text-red-600 hover:text-red-700 font-semibold flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-red-50 transition-all">
-                    🗑️ Xóa
+                    [Delete] Xóa
                   </button>
                 </div>
 
@@ -142,21 +149,26 @@ const total = computed(() => subtotal.value + shipping.value);
                     {{ ((item.product.price_after_discount || item.product.price) * item.quantity).toLocaleString() }}đ
                   </span>
                 </div>
+
               </div>
             </div>
+
           </div>
         </div>
+
         <div class="lg:col-span-1">
           <div class="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+
             <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-              📝 Tóm tắt đơn hàng
+              [Summary] Tóm tắt đơn hàng
             </h2>
-            
+
             <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100">
               <div class="flex justify-between text-gray-700">
                 <span>Tạm tính:</span>
                 <span class="font-semibold">{{ subtotal.toLocaleString() }}đ</span>
               </div>
+
               <div class="flex justify-between text-gray-700">
                 <span>Phí vận chuyển:</span>
                 <span class="font-semibold">
@@ -164,48 +176,48 @@ const total = computed(() => subtotal.value + shipping.value);
                   <span v-else>{{ shipping.toLocaleString() }}đ</span>
                 </span>
               </div>
+
               <div v-if="subtotal < 500000 && subtotal > 0" class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
                 <p class="text-sm text-yellow-800">
-                  💡 Mua thêm {{ (500000 - subtotal).toLocaleString() }}đ để được freeship!
+                  [Info] Mua thêm {{ (500000 - subtotal).toLocaleString() }}đ để được freeship
                 </p>
               </div>
             </div>
-            
+
             <div class="flex justify-between items-center text-xl font-bold mb-6 bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-lg">
               <span class="text-gray-800">Tổng cộng:</span>
               <span class="text-red-600 text-2xl">{{ total.toLocaleString() }}đ</span>
             </div>
-            
+
             <button
               @click="emit('navigate', 'checkout')"
               class="w-full py-4 bg-gradient-to-r from-red-600 to-orange-500 text-white rounded-xl hover:shadow-xl transition-all duration-300 font-bold text-lg flex items-center justify-center gap-2 group">
-              <span>💳 Thanh toán</span>
-              <span class="group-hover:translate-x-1 transition-transform">→</span>
+              [Checkout] Thanh toán
             </button>
 
             <button
               @click="emit('navigate', 'home')"
               class="w-full mt-3 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 font-semibold">
-              ← Tiếp tục mua sắm
+              [Home] Tiếp tục mua sắm
             </button>
 
             <div class="mt-6 pt-6 border-t space-y-3">
               <div class="flex items-center gap-3 text-sm text-gray-600">
-                <span class="text-xl">✅</span>
-                <span>Thanh toán bảo mật 100%</span>
+                [Secure] Thanh toán bảo mật
               </div>
               <div class="flex items-center gap-3 text-sm text-gray-600">
-                <span class="text-xl">🚚</span>
-                <span>Giao hàng nhanh 2-3 ngày</span>
+                [Shipping] Giao hàng nhanh 2-3 ngày
               </div>
               <div class="flex items-center gap-3 text-sm text-gray-600">
-                <span class="text-xl">🔄</span>
-                <span>Đổi trả miễn phí trong 7 ngày</span>
+                [Return] Đổi trả trong 7 ngày
               </div>
             </div>
+
           </div>
         </div>
+
       </div>
+
     </div>
   </div>
 </template>

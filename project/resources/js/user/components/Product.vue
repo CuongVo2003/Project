@@ -136,7 +136,10 @@ function addToCart(product) {
     <div class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex items-center gap-2 text-sm text-gray-600">
-          <button @click="emit('navigate', 'home')" class="hover:text-red-600">🏠 Trang chủ</button>
+          <button @click="emit('navigate', 'home')" class="hover:text-red-600 flex items-center gap-1">
+            <i class="fa-solid fa-house"></i>
+            <span>Trang chủ</span>
+          </button>
           <span>/</span>
           <span class="text-gray-800 font-medium">Sản phẩm</span>
         </div>
@@ -149,8 +152,11 @@ function addToCart(product) {
           <button
             @click="showFilters = !showFilters"
             class="w-full px-4 py-3 bg-white rounded-lg shadow-md flex items-center justify-between hover:shadow-lg transition">
-            <span class="font-semibold">🔍 Bộ lọc</span>
-            <span>{{ showFilters ? '▲' : '▼' }}</span>
+            <span class="font-semibold flex items-center gap-2">
+              <i class="fa-solid fa-filter"></i>
+              <span>Bộ lọc</span>
+            </span>
+            <i :class="showFilters ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"></i>
           </button>
         </div>
 
@@ -166,7 +172,7 @@ function addToCart(product) {
         <main class="lg:col-span-3">
           <div class="mb-6 bg-white rounded-lg shadow-md p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex items-center gap-2">
-              <span class="text-2xl">📦</span>
+              <i class="fa-solid fa-box text-2xl text-gray-600"></i>
               <p class="text-gray-700 font-medium">
                 Tìm thấy <span class="text-red-600 font-bold">{{ products.length }}</span> sản phẩm
               </p>
@@ -177,10 +183,10 @@ function addToCart(product) {
                 v-model="sort"
                 @change="handleSortChange"
                 class="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition">
-                <option value="latest">🆕 Mới nhất</option>
-                <option value="price_asc">💰 Giá: Thấp → Cao</option>
-                <option value="price_desc">💎 Giá: Cao → Thấp</option>
-                <option value="popular">🔥 Bán chạy</option>
+                <option value="latest">Mới nhất</option>
+                <option value="price_asc">Giá: Thấp → Cao</option>
+                <option value="price_desc">Giá: Cao → Thấp</option>
+                <option value="popular">Bán chạy</option>
               </select>
             </div>
           </div>
@@ -195,6 +201,7 @@ function addToCart(product) {
               </div>
             </div>
           </div>
+
           <div v-else-if="products.length > 0" class="space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               <ProductCard
@@ -210,8 +217,9 @@ function addToCart(product) {
               <button
                 @click="handlePageChange(currentPage - 1)"
                 :disabled="currentPage === 1"
-                class="px-4 py-2 bg-white rounded-lg shadow hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
-                ← Trước
+                class="px-4 py-2 bg-white rounded-lg shadow hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">
+                <i class="fa-solid fa-angle-left"></i>
+                <span>Trước</span>
               </button>
               
               <div class="flex gap-2">
@@ -232,14 +240,17 @@ function addToCart(product) {
               <button
                 @click="handlePageChange(currentPage + 1)"
                 :disabled="currentPage === totalPages"
-                class="px-4 py-2 bg-white rounded-lg shadow hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
-                Sau →
+                class="px-4 py-2 bg-white rounded-lg shadow hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">
+                <span>Sau</span>
+                <i class="fa-solid fa-angle-right"></i>
               </button>
             </div>
           </div>
 
           <div v-else class="text-center py-20">
-            <div class="text-8xl mb-6">🔍</div>
+            <div class="text-8xl mb-6">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
             <h3 class="text-2xl font-bold text-gray-700 mb-2">Không tìm thấy sản phẩm</h3>
             <p class="text-gray-500 mb-6">Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm khác</p>
             <button

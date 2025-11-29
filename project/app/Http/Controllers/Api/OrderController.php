@@ -10,14 +10,12 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    // Lấy danh sách đơn hàng của user
     public function index(Request $request)
     {
         $orders = $request->user()->orders()->with('items.product')->latest()->paginate(10);
         return response()->json($orders);
     }
 
-    // Chi tiết đơn hàng
     public function show(Request $request, Order $order)
     {
         if ($order->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
@@ -27,7 +25,6 @@ class OrderController extends Controller
         return response()->json($order->load('items.product'));
     }
 
-    // Tạo đơn hàng
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -42,7 +39,6 @@ class OrderController extends Controller
         $total = 0;
         $orderItems = [];
 
-        // Tính tổng và chuẩn bị order items
         foreach ($validated['items'] as $item) {
             $product = Product::findOrFail($item['product_id']);
 
@@ -59,11 +55,9 @@ class OrderController extends Controller
                 'price' => $price
             ];
 
-            // Giảm stock
             $product->decrement('stock', $item['quantity']);
         }
 
-        // Tạo order
         $order = Order::create([
             'user_id' => $request->user()->id,
             'total' => $total,
@@ -73,7 +67,6 @@ class OrderController extends Controller
             'shipping_address' => $validated['shipping_address']
         ]);
 
-        // Tạo order items
         foreach ($orderItems as $item) {
             $item['order_id'] = $order->id;
             OrderItem::create($item);
@@ -82,7 +75,6 @@ class OrderController extends Controller
         return response()->json($order->load('items.product'), 201);
     }
 
-    // Admin: cập nhật status
     public function updateStatus(Request $request, Order $order)
     {
         if (!$request->user()->isAdmin()) {
